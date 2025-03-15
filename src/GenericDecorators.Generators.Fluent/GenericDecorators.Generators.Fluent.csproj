@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <RootNamespace>GenericDecorators.Generators</RootNamespace>
+        <LangVersion>latest</LangVersion>
+        <IsRoslynAnalyzer>true</IsRoslynAnalyzer>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\GenericDecorators.Generators.Core\GenericDecorators.Generators.Core.csproj" />
+    </ItemGroup>
+
+</Project>
