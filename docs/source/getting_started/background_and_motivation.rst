@@ -182,7 +182,7 @@ Notice, how ``my_decorator`` does not care about the signature of the ``greet`` 
 return any value (even though the line 4 implies that it does) -- a detail which wouldn't go unnoticed in C#.
 
 
-Existing solutions
+Existing alternatives
 ------------------
 
 As mentioned in the :ref:`previous section <The problem with .NET type system>`, the constraints of strict type systems (when it comes to trying to make decorators and
