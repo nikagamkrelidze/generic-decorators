@@ -215,3 +215,41 @@ ensures that some constraints are met (for example, a ``For`` method is really t
 indeed a concrete interface and not a type parameter) and generates a concrete decorator.
 
 Let's consider a following example:
+
+.. sourcecode:: csharp
+    :linenos:
+
+    using GenericDecorators.Extensions.Core.BaseInterceptors;
+    using GenericDecorators.Extensions.Fluent;
+
+    Decorator.For<ISomeService, LoggingInterceptor>();
+    Decorator.For<IAnotherService, LoggingInterceptor>();
+
+    public interface ISomeService
+    {
+        void Execute(string parameter);
+    }
+
+    public interface IAnotherService
+    {
+        void PerformAction(int value);
+    }
+
+    public class LoggingInterceptor : SimpleInterceptor
+    {
+        public override void Process<TMethodContext>(
+            in TMethodContext methodContext,
+            Action<TMethodContext> internalImplementation)
+        {
+            Console.WriteLine("Entering method");
+            
+            internalImplementation(methodContext);
+            
+            Console.WriteLine("Exiting method");
+        }
+    }
+
+Simply because of the usages of ``For`` in our syntax on lines 4 and 5, the Generic Decorators library knows to generate concrete decorator implementations for the found combinations of intefaces and interceptors.
+
+.. image:: images/generation_example.png
+  :width: 300
