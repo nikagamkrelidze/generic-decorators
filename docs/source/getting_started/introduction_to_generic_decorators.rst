@@ -198,4 +198,20 @@ When working with Roslyn Source Generators, it's important to understand how the
 Source Generators are activated at **compile-time**. During compilation, the Roslyn platform allows them to inspect the entire source code and generate new code based on that inspection. In other words, they
 make decisions based on the code's **syntax**, not its **semantics**.
 
-Earlier, we stated that the Generic Decorators library allows 
+Earlier, we stated that the Generic Decorators library allows to generate decorators during compile time, based on a pair of types -- an interceptor and an interface. We looked into what goes in defining
+an intrceptor, now we need to see how to communicate to the Generic Decorators library (in the sense defined in previous paragraph) to generate a concrete decorator.
+
+Let's look at the example usage of Factory pattern, supported by the Generic Decorators library:
+
+.. sourcecode:: csharp
+
+    var decoratorBuilder = Decorator.For<ISomeService, LoggingInterceptor>();
+
+Here, ``Decorator.For<TInterface, TInterceptor>`` is a static method within a static type, shipped with the Generic Decorators library. It has multiple purposes, but for now let's focus on the following:
+it serves as a **trigger** for the library's source generator, that kicks in during compilation and generates a concrete decorator.
+
+In the example above, ``ISomeService`` can be *any* interface and a ``LoggingInterceptor`` inherits from a ``SimpleInterceptor``. During compilation, the Generic Decorators source generator sees this **syntax**,
+ensures that some constraints are met (for example, a ``For`` method is really the ``For`` that is shipped with the library and not some other method with a similar signature and that ``ISomeService`` is
+indeed a concrete interface and not a type parameter) and generates a concrete decorator.
+
+Let's consider a following example:
