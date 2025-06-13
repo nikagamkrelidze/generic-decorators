@@ -249,7 +249,9 @@ Let's consider a following example:
         }
     }
 
-Simply because of the usages of ``For`` in our syntax on lines 4 and 5, the Generic Decorators library knows to generate concrete decorator implementations for the found combinations of intefaces and interceptors.
+Simply because of the usages of ``For`` in our syntax on lines 4 and 5, the Generic Decorators library knows to generate concrete decorator implementations for the found combinations of intefaces and interceptors:
 
 .. image:: images/generation_example.png
   :width: 300
+
+The picture above 
