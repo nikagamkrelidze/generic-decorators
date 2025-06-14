@@ -267,3 +267,105 @@ such as instantiation -- is handled through a separate set of types, some of whi
 
 In addition to the decorator types, you will also see a third type -- ``SimpleDecoratorsInstantiator``. This class serves as a factory for creating instances of the generated decorators. Its usage and role in the
 instantiation process will be covered in a later section.
+
+.. note::
+
+    This section emphasizes triggering generation via ``Decorator.For<TInterface, TInterceptor>`` -- a nice approach for a C# project that uses Factory/Builder patterns for instantiating types. This approach is emphasized
+    for demonstrating an idea, other *triggers* are used for ASP.NET projects where static factories wouldn't be idiomatic.
+
+Inspecting generated decorators
+-------------------------------
+
+.. note::
+
+    You do not need to understand the generated types in order to use the Generic Decorators library effectively.
+
+Let's take a look at the contents of *Decorator_LoggingInterceptor_ISomeService.g.cs* from the example above (slightly formatted for better readibility):
+
+.. sourcecode:: csharp
+    :linenos:
+
+    namespace Decorators.LoggingInterceptor.ISomeService
+    {
+        public class Decorator : global::ISomeService
+        {
+            private readonly global::ISomeService _underlyingImplementation;
+            private readonly global::System.Collections.Generic.HashSet<global::System.String> _applicableMembers;
+            private readonly global::LoggingInterceptor _interceptor;
+
+            public Decorator(
+                global::ISomeService underlyingImplementation,
+                global::System.Collections.Generic.HashSet<global::System.String> applicableMembers,
+                global::LoggingInterceptor interceptor)
+            {
+                this._underlyingImplementation = underlyingImplementation;
+                this._applicableMembers = applicableMembers;
+                this._interceptor = interceptor;
+            }
+
+            private struct ExecuteMethodContext_0
+            {
+                public global::ISomeService underlyingImplementation;
+                public global::System.String parameter;
+            }
+
+            void global::ISomeService.Execute(global::System.String parameter)
+            {
+                if (_applicableMembers != null && !_applicableMembers.Contains(nameof(global::ISomeService.Execute)))
+                {
+                    _underlyingImplementation.Execute(parameter);
+                }
+
+                var methodContext = new ExecuteMethodContext_0
+                {
+                    underlyingImplementation = _underlyingImplementation,
+                    parameter = parameter
+                };
+
+                _interceptor.Process(in methodContext, static (methodContext) =>
+                {
+                    methodContext.underlyingImplementation.Execute(methodContext.parameter);
+                });
+            }
+        }
+    }
+
+We can see that it is a single type called ``Decorator`` in a dedicated namespace (that also mimicks previously described convention) that indeed implements ``ISomeService``, receives an internal implementation of the same type,
+an interceptor ``LoggingInterceptor`` and a ``HashSet<string>`` for filtering applicable members.
+
+Let's take a closer look at the implementation of ``ISomeService.Execute`` (line 25).
+
+First, on lines 27-30, there is a check that allows to short-circuit the execution and default to the internal implementation, based on the values in ``_applicableMembers``. The value for this set has been passed thorugh constructor, but we haven't
+discussed instantiation yet, so let's ignore that par for now.
+
+After that, on lines 32-36, we instantiate a certain structure ``ExecuteMethodContext_0``, that has been defined as a nested type on lines 19-23. This structure is generated per-method and contains everything that the interceptor will
+eventually need in order to trigger the internal implementation -- a reference to the internal implementation and a value passed to the method during invocation.
+
+This structure is then passed to the ``LoggingInteceptor``'s ``Process`` on line 38. That method, as we saw, is a virtual method define by the ``SimpleInterceptor``. Let's recall its definition in the context of its invocation to see how the pieces fit
+(slightly modified for clarity):
+
+.. sourcecode:: csharp
+
+    public override void Process<TMethodContext>(
+        in TMethodContext methodContext,
+        Action<TMethodContext> internalImplementation)
+    {
+        ...
+    }
+
+    ...
+
+    _interceptor.Process<ExecuteMethodContext_0>(
+        methodContext: in methodContext,
+        internalImplementation: static (ExecuteMethodContext_0 methodContext) =>
+        {
+            methodContext.underlyingImplementation.Execute(methodContext.parameter);
+        }
+    );
+
+What interceptor perceives as an ``Action`` (that allows authors of the interceptor to invoke a method on an internal implementation), in the case of the decorator for ``ISomeService.Execute`` is a  ``static`` lambda that needs a
+``ExecuteMethodContext_0``, expects it to contain a reference to the internal impelmentation, a parameter passed during the invocation and knows to invoke the ``Execute`` on that internal impelmentation in with that parameter.
+
+Because the method "context" (e.g. ``ExecuteMethodContext_0``) definitions are generated per-method, they are tailored to contain all the fields for holding the internal implementation and all the parameters that are required to invoke that method.
+Because they are instantiated per method invocation, they contain the actual values passed to the method. Meanwhile, interceptor's ``Process`` does not need to know any of the details to actually use them, it's all tucked away behind
+an ``Action<TMethodContext>`` -- that's why the interceptor can be reused accross all ``void`` methods in the given interface, and ineed, in other interfaces just as well.
