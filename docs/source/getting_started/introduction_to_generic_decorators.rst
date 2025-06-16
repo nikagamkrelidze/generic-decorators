@@ -191,8 +191,15 @@ In this example, the code on lines 10 and 14 is repeated on lines 21 and 25. How
 In principle, one could argue that having six distinct categories of methods is excessive and that fewer might suffice. However, the authors believe that the current setup strikes a good balance -- what is
 lost in conciseness is gained in flexibility.
 
+.. _triggering-generation:
+
 Triggering the generation
 -------------------------
+
+.. note::
+
+    This section emphasizes triggering generation via ``Decorator.For<TInterface, TInterceptor>`` -- a nice approach for a C# project that uses Factory/Builder patterns for instantiating types. This approach is used
+    for demonstrating an idea, other *triggers* are used for ASP.NET projects where static factories wouldn't be idiomatic.
 
 When working with Roslyn Source Generators, it's important to understand how they are triggered to perform their task. In contrast to "normal" code, which is executed via explicit invocation at **runtime**,
 Source Generators are activated at **compile-time**. During compilation, the Roslyn platform allows them to inspect the entire source code and generate new code based on that inspection. In other words, they
@@ -268,17 +275,12 @@ such as instantiation -- is handled through a separate set of types, some of whi
 In addition to the decorator types, you will also see a third type -- ``SimpleDecoratorsInstantiator``. This class serves as a factory for creating instances of the generated decorators. Its usage and role in the
 instantiation process will be covered in a later section.
 
-.. note::
-
-    This section emphasizes triggering generation via ``Decorator.For<TInterface, TInterceptor>`` -- a nice approach for a C# project that uses Factory/Builder patterns for instantiating types. This approach is emphasized
-    for demonstrating an idea, other *triggers* are used for ASP.NET projects where static factories wouldn't be idiomatic.
-
 Inspecting generated decorators
 -------------------------------
 
 .. note::
 
-    You do not need to understand the generated types in order to use the Generic Decorators library effectively.
+    You do not need to understand the generated types in order to use the Generic Decorators library effectively. It is still recommended to get somewhat familiar with the ideas that go into building decorators.
 
 Let's take a look at the contents of *Decorator_LoggingInterceptor_ISomeService.g.cs* from the example above (slightly formatted for better readibility):
 
@@ -353,7 +355,8 @@ This structure is then passed to the ``LoggingInteceptor``'s ``Process`` on line
         ...
     }
 
-    ...
+
+.. sourcecode:: csharp
 
     _interceptor.Process<ExecuteMethodContext_0>(
         methodContext: in methodContext,
@@ -363,9 +366,19 @@ This structure is then passed to the ``LoggingInteceptor``'s ``Process`` on line
         }
     );
 
-What interceptor perceives as an ``Action`` (that allows authors of the interceptor to invoke a method on an internal implementation), in the case of the decorator for ``ISomeService.Execute`` is a  ``static`` lambda that needs a
+What interceptor perceives as an ``Action<TMethodContext>`` (that allows authors of the interceptor to invoke a method on an internal implementation), in the case of the decorator for ``ISomeService.Execute`` is a  ``static`` lambda that needs a
 ``ExecuteMethodContext_0``, expects it to contain a reference to the internal impelmentation, a parameter passed during the invocation and knows to invoke the ``Execute`` on that internal impelmentation in with that parameter.
 
 Because the method "context" (e.g. ``ExecuteMethodContext_0``) definitions are generated per-method, they are tailored to contain all the fields for holding the internal implementation and all the parameters that are required to invoke that method.
 Because they are instantiated per method invocation, they contain the actual values passed to the method. Meanwhile, interceptor's ``Process`` does not need to know any of the details to actually use them, it's all tucked away behind
 an ``Action<TMethodContext>`` -- that's why the interceptor can be reused accross all ``void`` methods in the given interface, and ineed, in other interfaces just as well.
+
+Instantiating the decorators
+----------------------------
+
+Now that we've seen how to define interceptors and generate decoroator definitions based on them, let's see how to instantiate the generated decorators.
+
+.. note::
+
+    Much like the :ref:`section on generating decorators <triggering-generation>`, this section focuses on decorators that are generated using the static method ``Decorator.For<TInterface, TInterceptor>``.
+    Instantiating decorators for use with ASP.NET's dependency injection (DI) is a separate topic and is not covered here. The goal of this section is to introduce core concepts that apply universally to all generated decorators.
