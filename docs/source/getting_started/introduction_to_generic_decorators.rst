@@ -223,6 +223,8 @@ indeed a concrete interface and not a type parameter) and generates a concrete d
 
 Let's consider a following example:
 
+.. _triggering-generation-example:
+
 .. sourcecode:: csharp
     :linenos:
 
@@ -284,6 +286,8 @@ Inspecting generated decorators
 
 Let's take a look at the contents of *Decorator_LoggingInterceptor_ISomeService.g.cs* from the example above (slightly formatted for better readibility):
 
+.. _generated-decorator-example:
+
 .. sourcecode:: csharp
     :linenos:
 
@@ -316,6 +320,7 @@ Let's take a look at the contents of *Decorator_LoggingInterceptor_ISomeService.
                 if (_applicableMembers != null && !_applicableMembers.Contains(nameof(global::ISomeService.Execute)))
                 {
                     _underlyingImplementation.Execute(parameter);
+                    return;
                 }
 
                 var methodContext = new ExecuteMethodContext_0
@@ -332,19 +337,19 @@ Let's take a look at the contents of *Decorator_LoggingInterceptor_ISomeService.
         }
     }
 
-We can see that it is a single type called ``Decorator`` in a dedicated namespace (that also mimicks previously described convention) that indeed implements ``ISomeService``, receives an internal implementation of the same type,
-an interceptor ``LoggingInterceptor`` and a ``HashSet<string>`` for filtering applicable members.
+We can see that it is a single type called ``Decorator`` in a dedicated namespace (that also mimicks previously described convention) that indeed implements ``ISomeService``, receives an internal implementation
+of the same type, an interceptor ``LoggingInterceptor`` and a ``HashSet<string>`` for filtering applicable members.
 
 Let's take a closer look at the implementation of ``ISomeService.Execute`` (line 25).
 
-First, on lines 27-30, there is a check that allows to short-circuit the execution and default to the internal implementation, based on the values in ``_applicableMembers``. The value for this set has been passed thorugh constructor, but we haven't
-discussed instantiation yet, so let's ignore that par for now.
+First, on lines 27-31, there is a check that allows to short-circuit the execution and default to the internal implementation, based on the values in ``_applicableMembers``. The value for this set has been
+passed thorugh constructor, but we haven't discussed instantiation yet, so let's ignore that par for now.
 
-After that, on lines 32-36, we instantiate a certain structure ``ExecuteMethodContext_0``, that has been defined as a nested type on lines 19-23. This structure is generated per-method and contains everything that the interceptor will
-eventually need in order to trigger the internal implementation -- a reference to the internal implementation and a value passed to the method during invocation.
+After that, on lines 33-37, we instantiate a certain structure ``ExecuteMethodContext_0``, that has been defined as a nested type on lines 19-23. This structure is generated per-method and contains
+everything that the interceptor will eventually need in order to trigger the internal implementation -- a reference to the internal implementation and a value passed to the method during invocation.
 
-This structure is then passed to the ``LoggingInteceptor``'s ``Process`` on line 38. That method, as we saw, is a virtual method define by the ``SimpleInterceptor``. Let's recall its definition in the context of its invocation to see how the pieces fit
-(slightly modified for clarity):
+This structure is then passed to the ``LoggingInteceptor``'s ``Process`` on line 39. That method, as we saw, is a virtual method define by the ``SimpleInterceptor``. Let's recall its definition in the
+context of its invocation to see how the pieces fit (slightly modified for clarity):
 
 .. sourcecode:: csharp
 
@@ -354,7 +359,6 @@ This structure is then passed to the ``LoggingInteceptor``'s ``Process`` on line
     {
         ...
     }
-
 
 .. sourcecode:: csharp
 
@@ -366,12 +370,14 @@ This structure is then passed to the ``LoggingInteceptor``'s ``Process`` on line
         }
     );
 
-What interceptor perceives as an ``Action<TMethodContext>`` (that allows authors of the interceptor to invoke a method on an internal implementation), in the case of the decorator for ``ISomeService.Execute`` is a  ``static`` lambda that needs a
-``ExecuteMethodContext_0``, expects it to contain a reference to the internal impelmentation, a parameter passed during the invocation and knows to invoke the ``Execute`` on that internal impelmentation in with that parameter.
+What interceptor perceives as an ``Action<TMethodContext>`` (that allows authors of the interceptor to invoke a method on an internal implementation), in the case of the decorator for ``ISomeService.Execute`` is
+a  ``static`` lambda that needs a ``ExecuteMethodContext_0``, expects it to contain a reference to the internal impelmentation, a parameter passed during the invocation and knows to invoke the ``Execute`` on
+that internal impelmentation in with that parameter.
 
-Because the method "context" (e.g. ``ExecuteMethodContext_0``) definitions are generated per-method, they are tailored to contain all the fields for holding the internal implementation and all the parameters that are required to invoke that method.
-Because they are instantiated per method invocation, they contain the actual values passed to the method. Meanwhile, interceptor's ``Process`` does not need to know any of the details to actually use them, it's all tucked away behind
-an ``Action<TMethodContext>`` -- that's why the interceptor can be reused accross all ``void`` methods in the given interface, and ineed, in other interfaces just as well.
+Because the method "context" (e.g. ``ExecuteMethodContext_0``) definitions are generated per-method, they are tailored to contain all the fields for holding the internal implementation and all the parameters
+that are required to invoke that method. Because they are instantiated per method invocation, they contain the actual values passed to the method. Meanwhile, interceptor's ``Process`` does not need to know
+any of the details to actually use them, it's all tucked away behind an ``Action<TMethodContext>`` -- that's why the interceptor can be reused accross all ``void`` methods in the given interface, and ineed,
+in other interfaces just as well.
 
 Instantiating the decorators
 ----------------------------
@@ -381,4 +387,26 @@ Now that we've seen how to define interceptors and generate decoroator definitio
 .. note::
 
     Much like the :ref:`section on generating decorators <triggering-generation>`, this section focuses on decorators that are generated using the static method ``Decorator.For<TInterface, TInterceptor>``.
-    Instantiating decorators for use with ASP.NET's dependency injection (DI) is a separate topic and is not covered here. The goal of this section is to introduce core concepts that apply universally to all generated decorators.
+    Instantiating decorators for use with ASP.NET's dependency injection (DI) is a separate topic and is not covered here. The goal of this section is to introduce core concepts that apply universally to all
+    generated decorators.
+
+Let's expand on :ref:`our example of triggering generation<triggering-generation-example>`.
+
+We mentioned that ``Decorator.For<TInterface, TInterceptor>`` serves multiple purposes, one of them being triggering the generation of decorators. Importantly, another thing it does, is that it instantiates and
+returns a `builder <https://refactoring.guru/design-patterns/builder/csharp/example>`_ that can be used to configure and create an instance of the decorator that it triggered to generate.
+
+Recalling an :ref:`example of what a generated decorator looks like <triggering-generation-example>`, we see that its constructor requires 3 objects, an instance of an interceptor, an instance of the underlying
+implementation and an instance of a set of strings. The reason for needing the first two are self-evident, let's discuss the ``HashSet<string> applicableMembers``.
+
+In the same example, we can see how it's stored in a readonly ``_applicableMembers``. This field is used in lines 27-31 to determine whether the interceptor should handle the current method call, or if the decorator
+should instead delegate directly to the underlying implementation without involving any interception:
+
+.. sourcecode:: csharp
+
+    if (_applicableMembers != null && !_applicableMembers.Contains(nameof(global::ISomeService.Execute)))
+    {
+        _underlyingImplementation.Execute(parameter);
+        return;
+    }
+
+The set effectively acts as a filter: when passed to the decorator via its constructor, it lets the caller specify which methods the interceptor's logic should apply to.
