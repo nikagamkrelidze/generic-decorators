@@ -7,8 +7,8 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'Generic Decorators'
-copyright = '2025, Nikoloz Gamkrelidze, Radek Vlacil'
-author = 'Nikoloz Gamkrelidze, Radek Vlacil'
+copyright = '2025, Nikoloz Gamkrelidze'
+author = 'Nikoloz Gamkrelidze'
 release = '0.0.0'
 
 # -- General configuration ---------------------------------------------------

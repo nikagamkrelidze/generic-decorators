@@ -250,11 +250,11 @@ Let's consider a following example:
             in TMethodContext methodContext,
             Action<TMethodContext> internalImplementation)
         {
-            Console.WriteLine("Entering method");
+            Console.WriteLine("Entering interceptor");
             
             internalImplementation(methodContext);
             
-            Console.WriteLine("Exiting method");
+            Console.WriteLine("Exiting interceptor");
         }
     }
 
@@ -390,12 +390,7 @@ Now that we've seen how to define interceptors and generate decoroator definitio
     Instantiating decorators for use with ASP.NET's dependency injection (DI) is a separate topic and is not covered here. The goal of this section is to introduce core concepts that apply universally to all
     generated decorators.
 
-Let's expand on :ref:`our example of triggering generation<triggering-generation-example>`.
-
-We mentioned that ``Decorator.For<TInterface, TInterceptor>`` serves multiple purposes, one of them being triggering the generation of decorators. Importantly, another thing it does, is that it instantiates and
-returns a `builder <https://refactoring.guru/design-patterns/builder/csharp/example>`_ that can be used to configure and create an instance of the decorator that it triggered to generate.
-
-Recalling an :ref:`example of what a generated decorator looks like <triggering-generation-example>`, we see that its constructor requires 3 objects, an instance of an interceptor, an instance of the underlying
+Recalling an :ref:`example of what a generated decorator looks like <generated-decorator-example>`, we see that its constructor requires 3 objects, an instance of an interceptor, an instance of the underlying
 implementation and an instance of a set of strings. The reason for needing the first two are self-evident, let's discuss the ``HashSet<string> applicableMembers``.
 
 In the same example, we can see how it's stored in a readonly ``_applicableMembers``. This field is used in lines 27-31 to determine whether the interceptor should handle the current method call, or if the decorator
@@ -409,4 +404,98 @@ should instead delegate directly to the underlying implementation without involv
         return;
     }
 
-The set effectively acts as a filter: when passed to the decorator via its constructor, it lets the caller specify which methods the interceptor's logic should apply to.
+The set effectively acts as a filter -- when passed to the decorator via its constructor, (**if its value is not null**) it lets the caller specify which methods the interceptor's logic should apply to.
+
+Let's now modify :ref:`our example of triggering generation<triggering-generation-example>`.
+
+.. sourcecode:: csharp
+    :linenos:
+
+    using GenericDecorators.Extensions.Core.BaseInterceptors;
+    using GenericDecorators.Extensions.Fluent;
+
+    var decoratorBuilder = Decorator.For<ISomeService, LoggingInterceptor>();
+
+    decoratorBuilder
+        .WithImplementation(new SomeService())
+        .WithInterceptor(new LoggingInterceptor())
+        .ApplyToMembers(nameof(ISomeService.Execute));
+
+    var decoratedService = decoratorBuilder.Instantiate();
+
+    decoratedService.Execute("parameter value");
+
+    public interface ISomeService
+    {
+        void Execute(string parameter);
+    }
+
+    public class SomeService : ISomeService
+    {
+        public void Execute(string parameter)
+        {
+            Console.WriteLine($"Executing with parameter: {parameter}");
+        }
+    }
+
+    public class LoggingInterceptor : SimpleInterceptor
+    {
+        public override void Process<TMethodContext>(
+            in TMethodContext methodContext,
+            Action<TMethodContext> internalImplementation)
+        {
+            Console.WriteLine("Entering interceptor");
+
+            internalImplementation(methodContext);
+
+            Console.WriteLine("Exiting interceptor");
+        }
+    }
+
+We mentioned that ``Decorator.For<TInterface, TInterceptor>`` serves multiple purposes, one of them being triggering the generation of decorators. Importantly, another thing it does, is that it instantiates and
+returns a `builder <https://refactoring.guru/design-patterns/builder/csharp/example>`_ that can be used to configure and create an instance of the decorator that it triggered to generate.
+
+More specifically, we can see that the ``For`` method returns a certain ``SimpleDecoratorBuilder``, shipped with the ``GenericDecorators.Extensions`` package:
+
+.. sourcecode:: csharp
+
+    public record SimpleDecoratorBuilder<TInterface, TInterceptor>
+            : IEquatable<SimpleDecoratorBuilder<TInterface, TInterceptor>>
+        where TInterface : class
+        where TInterceptor : SimpleInterceptor
+
+Lines 7-9 of our example above, show what are the methods that can be used with the builder and therefore what are some of the "settings" that can be set on it. It's easy to recognize, how they correspond to the
+constructor of the generated decorator from the previous :ref:`example of what a generated decorator looks like <generated-decorator-example>`.
+
+And indeed, the code behind the ``Instantiate`` method (from line 11), shows the usage of the values that were set on the builder:
+
+.. sourcecode:: csharp
+    :linenos:
+
+    public TInterface? Instantiate()
+    {
+        if (_underlyingImplementation == null)
+        {
+            throw new InvalidOperationException($"Need to provide underlying implementation via {nameof(WithImplementation)}");
+        }
+
+        if (_interceptor == null)
+        {
+            throw new InvalidOperationException($"Need to provide underlying interceptor via {nameof(WithInterceptor)}");
+        }
+
+        return DecoratorsFactory
+            .Instance
+            .InstantiateSimpleDecorator(
+                _underlyingImplementation!,
+                _applicableMembers,
+                _interceptor!);
+    }
+
+This method actually instnantiates the generated decorator - let's go through, to understand how it achieves its purpose.
+
+The return type of the ``Instantiate`` is ``TInterface`` -- that is the type that was used when creating the ``SimpleDecoratorBuilder``. That makes sense: the instantinated decorator needs to implement the
+interface that it's decorating.
+
+First, on lines 3-11, we check that the current builder has been enriched with the values that are absolutely neccessary for instantiating the decorator -- the underlying implementation and an interceptor.
+
