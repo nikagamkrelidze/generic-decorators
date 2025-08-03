@@ -1,0 +1,53 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Generators", "Generators", "{CB0FD285-BD79-452F-81FB-8A71234F79DD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extensions", "Extensions", "{638B6FE8-F642-4E89-BF99-2CC6DD99DA77}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericDecorators.Extensions.Core", "GenericDecorators.Extensions.Core\GenericDecorators.Extensions.Core.csproj", "{B8DE57E0-E20E-46E7-B55C-D6E094756C3D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericDecorators.Extensions.Fluent", "GenericDecorators.Extensions.Fluent\GenericDecorators.Extensions.Fluent.csproj", "{F2AB694E-B044-4216-BEAB-469E57B9BDD7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{7E052A45-C1D1-4096-8BFE-93FAB0AECAAE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericDecorators.Generators.Core", "GenericDecorators.Generators.Core\GenericDecorators.Generators.Core.csproj", "{FE235311-FDD7-42BC-8AAD-65E09248B1FF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericDecorators.Tests.Generated", "GenericDecorators.Tests.Generated\GenericDecorators.Tests.Generated.csproj", "{9837309A-422C-4342-B76E-5245CB0D8220}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericDecorators.Generators.Fluent", "GenericDecorators.Generators.Fluent\GenericDecorators.Generators.Fluent.csproj", "{A2E2FCB7-951F-4598-A678-A9FE50A757ED}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B8DE57E0-E20E-46E7-B55C-D6E094756C3D} = {638B6FE8-F642-4E89-BF99-2CC6DD99DA77}
+		{F2AB694E-B044-4216-BEAB-469E57B9BDD7} = {638B6FE8-F642-4E89-BF99-2CC6DD99DA77}
+		{FE235311-FDD7-42BC-8AAD-65E09248B1FF} = {CB0FD285-BD79-452F-81FB-8A71234F79DD}
+		{9837309A-422C-4342-B76E-5245CB0D8220} = {7E052A45-C1D1-4096-8BFE-93FAB0AECAAE}
+		{A2E2FCB7-951F-4598-A678-A9FE50A757ED} = {CB0FD285-BD79-452F-81FB-8A71234F79DD}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B8DE57E0-E20E-46E7-B55C-D6E094756C3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8DE57E0-E20E-46E7-B55C-D6E094756C3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8DE57E0-E20E-46E7-B55C-D6E094756C3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8DE57E0-E20E-46E7-B55C-D6E094756C3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2AB694E-B044-4216-BEAB-469E57B9BDD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2AB694E-B044-4216-BEAB-469E57B9BDD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2AB694E-B044-4216-BEAB-469E57B9BDD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2AB694E-B044-4216-BEAB-469E57B9BDD7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE235311-FDD7-42BC-8AAD-65E09248B1FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE235311-FDD7-42BC-8AAD-65E09248B1FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE235311-FDD7-42BC-8AAD-65E09248B1FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE235311-FDD7-42BC-8AAD-65E09248B1FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9837309A-422C-4342-B76E-5245CB0D8220}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9837309A-422C-4342-B76E-5245CB0D8220}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9837309A-422C-4342-B76E-5245CB0D8220}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9837309A-422C-4342-B76E-5245CB0D8220}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2E2FCB7-951F-4598-A678-A9FE50A757ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2E2FCB7-951F-4598-A678-A9FE50A757ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2E2FCB7-951F-4598-A678-A9FE50A757ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2E2FCB7-951F-4598-A678-A9FE50A757ED}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

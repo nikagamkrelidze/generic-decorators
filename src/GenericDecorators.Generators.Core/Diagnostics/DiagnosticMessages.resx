@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<root>
+    <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:element name="root" msdata:IsDataSet="true">
+            
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="InvalidInterceptorSymbolMessage" xml:space="preserve">
+    <value>The Interceptor type {0} is not derived from the {1}</value>
+  </data>
+    <data name="InvalidInterceptorSymbolTitle" xml:space="preserve">
+    <value>Invalid type used where interceptor was expected</value>
+  </data>
+    <data name="InvalidInterfaceSymbolMessage" xml:space="preserve">
+    <value>The type {0} is not a valid interface</value>
+  </data>
+    <data name="InvalidInterfaceSymbolTitle" xml:space="preserve">
+    <value>Invalid type used where interface was expected</value>
+  </data>
+    <data name="InvalidNumberOfInterceptorConstructorsMessage" xml:space="preserve">
+    <value>The type {0} mustonly have one public constructor</value>
+  </data>
+    <data name="InvalidNumberOfInterceptorConstructorsTitle" xml:space="preserve">
+    <value>Interceptor must only have one public constructor</value>
+  </data>
+    <data name="NoOpenGenericInterfacesAllowedMessage" xml:space="preserve">
+    <value>The type {0} must not be an generic interface</value>
+  </data>
+    <data name="NoOpenGenericInterfacesAllowedTitle" xml:space="preserve">
+    <value>Open generic interfaces not allowed</value>
+  </data>
+    <data name="NoParamsParamteresAllowedMessage" xml:space="preserve">
+    <value>The type {0} must not have methods with params parameters</value>
+  </data>
+    <data name="NoParamsParamteresAllowedTitle" xml:space="preserve">
+    <value>Params parameters not allowed</value>
+  </data>
+    <data name="NoRefParamteresAllowedMessage" xml:space="preserve">
+    <value>The type {0} must not have methods with reference parameters</value>
+  </data>
+    <data name="NoRefParamteresAllowedTitle" xml:space="preserve">
+    <value>Reference parameters not allowed</value>
+  </data>
+    <data name="OnlyMethodsAndPropertiesAllowedMessage" xml:space="preserve">
+    <value>The type {0} can only have method or property members</value>
+  </data>
+    <data name="OnlyMethodsPropertiesAllowedTitle" xml:space="preserve">
+    <value>Non-method members not allowed</value>
+  </data>
+</root>
